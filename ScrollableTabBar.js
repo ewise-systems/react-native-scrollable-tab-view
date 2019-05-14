@@ -2,6 +2,7 @@ const React = require('react');
 const { ViewPropTypes } = ReactNative = require('react-native');
 const PropTypes = require('prop-types');
 const createReactClass = require('create-react-class');
+const LinearGradient = require('react-native-linear-gradient').default;
 const {
   View,
   Animated,
@@ -31,6 +32,11 @@ const ScrollableTabBar = createReactClass({
     renderTab: PropTypes.func,
     underlineStyle: ViewPropTypes.style,
     onScroll: PropTypes.func,
+    gradientStartColor: PropTypes.string,
+    gradientEndColor: PropTypes.string,
+    gradientStart: PropTypes.object,
+    gradientEnd: PropTypes.object,
+    linearGradientStyle: ViewPropTypes.style,
   },
 
   getDefaultProps() {
@@ -43,6 +49,17 @@ const ScrollableTabBar = createReactClass({
       tabStyle: {},
       tabsContainerStyle: {},
       underlineStyle: {},
+      gradientStartColor: null,
+      gradientEndColor: null,
+      gradientStart: {
+        x: 0,
+        y: 0,
+      },
+      gradientEnd: {
+        x: 1,
+        y: 0,
+      },
+      linearGradientStyle: {},
     };
   },
 
@@ -184,18 +201,25 @@ const ScrollableTabBar = createReactClass({
         bounces={false}
         scrollsToTop={false}
       >
-        <View
-          style={[styles.tabs, {width: this.state._containerWidth, }, this.props.tabsContainerStyle, ]}
-          ref={'tabContainer'}
-          onLayout={this.onTabContainerLayout}
+        <LinearGradient
+          start={this.props.start}
+          end={this.props.end}
+          colors={[this.props.gradientStartColor, this.props.gradientEndColor, ]}
+          style={[styles.linearGradient, this.props.linearGradientStyle, ]}
         >
-          {this.props.tabs.map((name, page) => {
-            const isTabActive = this.props.activeTab === page;
-            const renderTab = this.props.renderTab || this.renderTab;
-            return renderTab(name, page, isTabActive, this.props.goToPage, this.measureTab.bind(this, page));
-          })}
-          <Animated.View style={[tabUnderlineStyle, dynamicTabUnderline, this.props.underlineStyle, ]} />
-        </View>
+            <View
+              style={[styles.tabs, { width: this.state._containerWidth, }, this.props.tabsContainerStyle, ]}
+              ref={'tabContainer'}
+              onLayout={this.onTabContainerLayout}
+            >
+              {this.props.tabs.map((name, page) => {
+                const isTabActive = this.props.activeTab === page;
+                const renderTab = this.props.renderTab || this.renderTab;
+                return renderTab(name, page, isTabActive, this.props.goToPage, this.measureTab.bind(this, page));
+              })}
+              <Animated.View style={[tabUnderlineStyle, dynamicTabUnderline, this.props.underlineStyle, ]} />
+            </View>
+        </LinearGradient>
       </ScrollView>
     </View>;
   },
@@ -244,5 +268,8 @@ const styles = StyleSheet.create({
   tabs: {
     flexDirection: 'row',
     justifyContent: 'space-around',
+  },
+  linearGradient: {
+    flex: 1,
   },
 });
